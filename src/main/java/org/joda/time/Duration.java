@@ -46,6 +46,10 @@ public final class Duration
 
     /** Serialization version */
     private static final long serialVersionUID = 2471658376918L;
+    
+    private final long seconds = 0;
+    
+    private final int nanos = 0;
 
     //-----------------------------------------------------------------------
     /**
@@ -59,6 +63,39 @@ public final class Duration
     @FromString
     public static Duration parse(String str) {
         return new Duration(str);
+    }
+    
+    private static final long NANOS_PER_SECOND = 1000_000_000L;
+        //-----------------------------------------------------------------------
+    /**
+     * Obtains a {@code Duration} representing a number of nanoseconds.
+     * <p>
+     * The seconds and nanoseconds are extracted from the specified nanoseconds.
+     *
+     * @param nanos  the number of nanoseconds, positive or negative
+     * @return a {@code Duration}, not null
+     */
+    public static Duration ofNanos(long nanos) {
+        long secs = nanos / NANOS_PER_SECOND;
+        int nos = (int) (nanos % NANOS_PER_SECOND);
+        if (nos < 0) {
+            nos += NANOS_PER_SECOND;
+            secs--;
+        }
+        return create(secs, nos);
+    }
+    
+    private static Duration create(long seconds, int nanoAdjustment) {
+        if ((seconds | nanoAdjustment) == 0) {
+            return ZERO;
+        }
+        return new Duration(seconds, nanoAdjustment);
+    }
+    
+    public long toMillis() {
+        long millis = Math.multiplyExact(seconds, 1000);
+        millis = Math.addExact(millis, nanos / 1000_000);
+        return millis;
     }
 
     //-----------------------------------------------------------------------
